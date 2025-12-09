@@ -49,7 +49,7 @@ export function Navbar() {
 
           <div class="hidden md:flex items-center gap-4 text-sm font-poppins">
             <div class="flex items-center gap-2">
-              <span>🔥</span>
+              <span><i data-lucide="wallet" class="w-4 h-4 text-[#F4A938]"></i></span>
               <span>${creditsText}</span>
             </div>
 

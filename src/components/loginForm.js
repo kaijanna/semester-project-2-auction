@@ -21,15 +21,27 @@ export function LoginForm() {
           />
         </div>
 
-        <div>
-          <label class="block text-sm mb-1 text-[#6B7280]">Password</label>
-          <input 
-            type="password"
-            name="password"
-            placeholder="Your password"
-            class="w-full border border-[#E5E7EB] rounded-md p-2 text-sm font-inter"
-          />
-        </div>
+       <div>
+  <label class="block text-sm mb-1 text-[#6B7280]">Password</label>
+
+  <div class="relative">
+    <input
+      id="password"
+      type="password"
+      name="password"
+      placeholder="Your password"
+      class="w-full border border-[#E5E7EB] rounded-md p-2 pr-10 text-sm font-inter"
+    />
+
+    <button
+  type="button"
+  id="toggle-password"
+  class="absolute inset-y-0 right-3 flex items-center text-[#6B7280]"
+   >
+    <i data-lucide="eye" class="w-5 h-5"></i>
+   </button>
+  </div>
+</div>
 
             <button type="submit" class="btn-primary w-full">
               Login

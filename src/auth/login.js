@@ -10,6 +10,33 @@ export function setupLoginForm() {
   const messageElement = document.getElementById("loginMessage");
   const submitButton = form.querySelector("button[type='submit']");
 
+  const passwordInput = form.querySelector("input[name='password']");
+  const togglePasswordButton = document.getElementById("toggle-password");
+
+  if (passwordInput && togglePasswordButton) {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+
+    togglePasswordButton.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+
+      if (isPassword) {
+        passwordInput.type = "text";
+        togglePasswordButton.innerHTML =
+          '<i data-lucide="eye-off" class="w-5 h-5"></i>';
+      } else {
+        passwordInput.type = "password";
+        togglePasswordButton.innerHTML =
+          '<i data-lucide="eye" class="w-5 h-5"></i>';
+      }
+
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -34,7 +61,10 @@ export function setupLoginForm() {
     setLoading(true);
 
     try {
-      const apiData = await loginUser({ email: emailValue, password: passwordValue });
+      const apiData = await loginUser({
+        email: emailValue,
+        password: passwordValue,
+      });
 
       if (!apiData || !apiData.data) {
         showError("Login failed. Please try again.");
@@ -68,9 +98,7 @@ export function setupLoginForm() {
       if (token && userName) {
         try {
           userProfile = await fetchProfile(userName, token);
-        } catch (profileError) {
-          
-        }
+        } catch (profileError) {}
       }
 
       let userToStore = apiData.data;

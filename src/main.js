@@ -110,6 +110,7 @@ async function render() {
   if (currentRoute === "edit-profile") {
     setupEditProfileForm();
   }
+  
 
   if (currentRoute === "home" || currentRoute === "search") {
     setupSearchBar();
@@ -147,7 +148,12 @@ async function render() {
       }
     });
   }
+   if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
 }
+
+
 
 window.addEventListener("load", function () {
   render();
