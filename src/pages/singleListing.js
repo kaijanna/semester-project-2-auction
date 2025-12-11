@@ -2,6 +2,7 @@ import { Navbar } from "../components/navbar.js";
 import { Footer } from "../components/footer.js";
 import { fetchListingById } from "../api/listings.js";
 import { placeBid } from "../api/bids.js";
+import { fetchProfile } from "../api/profile.js";
 
 export async function SingleListingPage(listingId) {
   let listing = null;
@@ -309,25 +310,43 @@ export async function SingleListingPage(listingId) {
                   <h1 class="text-xl font-poppins font-semibold mb-1">
                     ${title}
                   </h1>
-                  <p class="text-sm text-[#6B7280]">
-                    Seller: ${sellerName}
+                 <p class="text-sm text-[#6B7280]">
+                    Seller:
+                           ${
+                             sellerName !== "Unknown seller"
+                               ? `<a href="#/seller/${encodeURIComponent(
+                                   sellerName
+                                 )}" class="text-[#111827] hover:underline">
+                             ${sellerName}
+                          </a>`
+                               : `<span>${sellerName}</span>`
+                           }
                   </p>
                 </div>
 
                 <div class="flex flex-col gap-1 text-sm text-[#374151]">
-                  <p>
-                    <span class="font-semibold">Ends:</span>
-                    ${endsAtText}
-                  </p>
-                  <p>
+                       <p>
+                       <span class="font-semibold">Ends:</span>
+                        <span id="listing-ends-at-text">${endsAtText}</span>
+                          </p>
+                          <p>
+                       <span class="font-semibold">Time left:</span>
+                           <span
+                         id="listing-countdown-text"
+                       data-ends-at="${listing.endsAt ? listing.endsAt : ""}"
+                         >
+                         ${listing.endsAt ? "Calculating…" : "No end date"}
+                        </span>
+                      </p>
+                     <p>
                     <span class="font-semibold">Current bid:</span>
-                    ${highestBid > 0 ? highestBid + " NOK" : "No bids yet"}
-                  </p>
-                  <p>
-                    <span class="font-semibold">Bids:</span>
-                    ${numberOfBids}
-                  </p>
-                </div>
+                     ${highestBid > 0 ? highestBid + " NOK" : "No bids yet"}
+                        </p>
+                         <p>
+                        <span class="font-semibold">Bids:</span>
+                           ${numberOfBids}
+                             </p>
+                         </div>
 
                 ${actionHtml}
 
@@ -429,6 +448,7 @@ export function setupSingleListingBidding(listingId) {
     }
 
     const token = auth.token;
+    const userName = auth && auth.user && auth.user.name ? auth.user.name : "";
 
     if (!token) {
       message.textContent = "You must be logged in to place a bid.";
@@ -439,6 +459,12 @@ export function setupSingleListingBidding(listingId) {
     try {
       await placeBid(listingId, amount, token);
 
+      if (userName !== "") {
+        try {
+          await fetchProfile(userName, token);
+        } catch (profileError) {}
+      }
+
       message.textContent = "Bid placed!";
       message.className = "text-sm text-[#10B981]";
 
@@ -448,4 +474,66 @@ export function setupSingleListingBidding(listingId) {
       message.className = "text-sm text-[#F44344]";
     }
   });
+}
+
+export function setupSingleListingCountdown() {
+  const countdownElement = document.getElementById("listing-countdown-text");
+
+  if (!countdownElement) {
+    return;
+  }
+
+  const endsAtValue = countdownElement.getAttribute("data-ends-at");
+
+  if (!endsAtValue) {
+    countdownElement.textContent = "No end date";
+    return;
+  }
+
+  const endsAtDate = new Date(endsAtValue);
+
+  if (Number.isNaN(endsAtDate.getTime())) {
+    countdownElement.textContent = "No end date";
+    return;
+  }
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const diff = endsAtDate.getTime() - now;
+
+    if (diff <= 0) {
+      countdownElement.textContent = "Auction ended";
+      clearInterval(intervalId);
+      return;
+    }
+
+    const oneSecond = 1000;
+    const oneMinute = oneSecond * 60;
+    const oneHour = oneMinute * 60;
+    const oneDay = oneHour * 24;
+
+    const days = Math.floor(diff / oneDay);
+    const hours = Math.floor((diff % oneDay) / oneHour);
+    const minutes = Math.floor((diff % oneHour) / oneMinute);
+    const seconds = Math.floor((diff % oneMinute) / oneSecond);
+
+    const parts = [];
+
+    if (days > 0) {
+      parts.push(days + "d");
+    }
+
+    if (hours > 0 || days > 0) {
+      parts.push(hours + "h");
+    }
+
+    parts.push(minutes + "m");
+    parts.push(seconds + "s");
+
+    countdownElement.textContent = parts.join(" ");
+  }
+
+  updateCountdown();
+
+  const intervalId = window.setInterval(updateCountdown, 1000);
 }

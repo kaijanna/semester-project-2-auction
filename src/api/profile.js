@@ -111,3 +111,4 @@ export async function updateProfile(profileName, token, body) {
 
   return profile;
 }
+

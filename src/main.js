@@ -1,6 +1,7 @@
 import { HomePage } from "./pages/home.js";
 import { RegisterPage } from "./pages/register.js";
 import { LoginPage } from "./pages/login.js";
+
 import { setupSearchBar } from "./components/searchBar.js";
 import { setupLoginForm } from "./auth/login.js";
 import { setupRegisterForm } from "./auth/register.js";
@@ -9,6 +10,7 @@ import {
   SingleListingPage,
   setupSingleListingGallery,
   setupSingleListingBidding,
+  setupSingleListingCountdown,
 } from "./pages/singleListing.js";
 import {
   CreateListingPage,
@@ -18,6 +20,7 @@ import { EditListingPage, setupEditListingForm } from "./pages/editListing.js";
 import { MyListingsPage } from "./pages/myListings.js";
 import { MyBidsPage } from "./pages/myBids.js";
 import { EditProfilePage, setupEditProfileForm } from "./pages/editProfile.js";
+import { SellerProfilePage } from "./pages/sellerProfile.js";
 
 const app = document.getElementById("app");
 
@@ -25,10 +28,12 @@ async function render() {
   if (!app) {
     return;
   }
+
   const hashFromLocation = window.location.hash || "#/";
 
   let routePart = hashFromLocation;
   let searchText = "";
+  let filter = "all";
 
   const indexOfQuestionMark = hashFromLocation.indexOf("?");
 
@@ -38,9 +43,14 @@ async function render() {
 
     const params = new URLSearchParams(queryString);
     const searchFromUrl = params.get("q");
+    const filterFromUrl = params.get("filter");
 
     if (searchFromUrl) {
       searchText = searchFromUrl;
+    }
+
+    if (filterFromUrl) {
+      filter = filterFromUrl;
     }
   }
 
@@ -80,10 +90,16 @@ async function render() {
     pageHtml = await MyBidsPage();
     currentRoute = "my-bids";
   } else if (routePart === "#/search") {
-    pageHtml = await HomePage(searchText);
+    pageHtml = await HomePage(searchText, filter);
     currentRoute = "search";
+  } else if (routePart.startsWith("#/seller/")) {
+    const sellerNameFromUrl = routePart.replace("#/seller/", "");
+    const sellerName = decodeURIComponent(sellerNameFromUrl);
+
+    pageHtml = await SellerProfilePage(sellerName);
+    currentRoute = "seller-profile";
   } else {
-    pageHtml = await HomePage();
+    pageHtml = await HomePage("", filter);
     currentRoute = "home";
   }
 
@@ -98,6 +114,7 @@ async function render() {
   if (currentRoute === "listing") {
     setupSingleListingGallery();
     setupSingleListingBidding(currentListingId);
+    setupSingleListingCountdown();
   }
   if (currentRoute === "create") {
     setupCreateListingForm();
@@ -110,7 +127,6 @@ async function render() {
   if (currentRoute === "edit-profile") {
     setupEditProfileForm();
   }
-  
 
   if (currentRoute === "home" || currentRoute === "search") {
     setupSearchBar();
@@ -148,12 +164,10 @@ async function render() {
       }
     });
   }
-   if (window.lucide && typeof window.lucide.createIcons === "function") {
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
   }
 }
-
-
 
 window.addEventListener("load", function () {
   render();

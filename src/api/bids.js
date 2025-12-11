@@ -70,3 +70,42 @@ export async function fetchProfileBids(profileName, token) {
 
   return bids;
 }
+
+export async function fetchProfileWins(profileName, token) {
+  const url =
+    API_BASE +
+    "/auction/profiles/" +
+    encodeURIComponent(profileName) +
+    "/wins?_listings=true";
+
+  const options = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+      "X-Noroff-API-Key": API_KEY,
+    },
+  };
+
+  const response = await fetch(url, options);
+  const json = await response.json();
+
+  if (!response.ok) {
+    let errorMessage = "Could not load winning bids.";
+
+    if (json && json.errors && json.errors.length > 0) {
+      errorMessage = json.errors[0].message;
+    } else if (json && json.message) {
+      errorMessage = json.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  let wins = [];
+
+  if (json && Array.isArray(json.data)) {
+    wins = json.data;
+  }
+
+  return wins;
+}
