@@ -20,7 +20,7 @@ export function setupRegisterForm() {
 
     const username = form.username.value.trim();
     const email = form.email.value.trim();
-    const password = form.password.value.trim().toLowerCase();
+    const password = form.password.value.trim();
 
     if (username.length < 3) {
       showError("Username must be at least 3 characters.");
