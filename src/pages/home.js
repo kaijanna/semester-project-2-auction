@@ -12,6 +12,25 @@ function getBidCount(listing) {
   return 0;
 }
 
+function isActiveListing(listing) {
+  if (!listing || !listing.endsAt) {
+    return false;
+  }
+
+  const endDate = new Date(listing.endsAt);
+  const now = new Date();
+
+  return endDate > now;
+}
+
+function getCreatedTime(listing) {
+  if (!listing || !listing.created) {
+    return 0;
+  }
+
+  return new Date(listing.created).getTime();
+}
+
 export async function HomePage(searchText = "", filter = "all") {
   let finalListings = [];
   let allListings = [];
@@ -30,26 +49,21 @@ export async function HomePage(searchText = "", filter = "all") {
         allListings = apiListings;
       }
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 
-  
   let popularHtml = "";
 
   if (Array.isArray(allListings) && allListings.length > 0) {
-    const sortedByBids = allListings
-      .slice()
-      .sort(function (first, second) {
-        return getBidCount(second) - getBidCount(first);
-      });
+    const newestListings = allListings.slice().sort(function (first, second) {
+      return getCreatedTime(second) - getCreatedTime(first);
+    });
 
-    const topThree = sortedByBids.slice(0, 3);
+    const topThree = newestListings.slice(0, 3);
 
-    if (topThree.length === 0 || getBidCount(topThree[0]) === 0) {
+    if (topThree.length === 0) {
       popularHtml = `
         <p class="text-sm text-[#6B7280]">
-          No popular listings yet.
+          No new listings yet.
         </p>
       `;
     } else {
@@ -97,10 +111,10 @@ export async function HomePage(searchText = "", filter = "all") {
         <section class="space-y-2">
           <div class="flex flex-col gap-1">
             <h2 class="text-sm font-poppins font-semibold text-[#111827]">
-              Popular right now
+              Newest listings
             </h2>
             <p class="text-xs text-[#6B7280]">
-              Listings with the highest number of bids.
+              The latest auctions added to the marketplace.
             </p>
           </div>
 
@@ -112,18 +126,17 @@ export async function HomePage(searchText = "", filter = "all") {
     }
   }
 
-  
   if (Array.isArray(finalListings) && finalListings.length > 0) {
     if (filter === "ending-soon") {
-      finalListings.sort(function (first, second) {
-        const firstTime = first.endsAt
-          ? new Date(first.endsAt).getTime()
-          : Number.POSITIVE_INFINITY;
-        const secondTime = second.endsAt
-          ? new Date(second.endsAt).getTime()
-          : Number.POSITIVE_INFINITY;
-        return firstTime - secondTime;
-      });
+      finalListings = finalListings
+        .filter(function (listing) {
+          return isActiveListing(listing);
+        })
+        .sort(function (first, second) {
+          return (
+            new Date(first.endsAt).getTime() - new Date(second.endsAt).getTime()
+          );
+        });
     } else if (filter === "most-bids") {
       finalListings.sort(function (first, second) {
         return getBidCount(second) - getBidCount(first);
@@ -131,7 +144,6 @@ export async function HomePage(searchText = "", filter = "all") {
     }
   }
 
-  
   let cardsHtml = "";
 
   if (!Array.isArray(finalListings) || finalListings.length === 0) {
@@ -223,4 +235,3 @@ export async function HomePage(searchText = "", filter = "all") {
     </div>
   `;
 }
-
