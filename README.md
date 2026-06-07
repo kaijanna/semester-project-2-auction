@@ -1,7 +1,19 @@
 # Crow Auction House
+![Homepage Screenshot](assets/screenshots/homepage.png)
 
-An auction website where users can register, log in, browse listings, place bids, and create their own auctions.  
-This project is made for **Semester Project 2** at Noroff (Frontend Development).
+Crow Auction House is an online auction platform where users can create listings, place bids, manage their profiles and compete for items in real time.
+
+The project was developed as Semester Project 2 at Noroff and focuses on API integration, authentication, user-generated content and responsive frontend development.
+[Live Site](https://semester-project-2-anna.netlify.app/)
+
+## Improvements Made for Portfolio
+Before adding this project to my portfolio, I reviewed the application and made improvements to the listing logic and user experience.
+- Updated the "Ending Soon" filter to exclude expired auctions.
+- Improved listing relevance by ensuring only active auctions appear in time-sensitive views.
+- Reviewed homepage sorting logic and project documentation.
+- Updated screenshots and README documentation.
+
+These changes improve the accuracy of auction results and provide a more reliable user experience.
 
 ---
 
